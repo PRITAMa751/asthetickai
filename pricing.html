@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASTHEICKAI</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">ASTHEICKAI</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="pricing.html" class="active">Pricing</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="#" class="cta-button">Try Free</a></li>
+    </ul>
+    <div class="mobile-menu-icon">
+      <i class="fas fa-bars"></i>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="pricing.html" class="active">Pricing</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="#" class="cta-button">Try Free</a></li>
+    </ul>
+  </div>
+
+  <!-- Pricing Hero -->
+  <section class="pricing-hero">
+    <h1>Simple, transparent pricing</h1>
+    <p>Choose the plan that works best for you</p>
+  </section>
+
+  <!-- Pricing Plans -->
+  <section class="pricing-plans">
+    <div class="plan">
+      <h3>Starter</h3>
+      <div class="price">₹199<span>/month</span></div>
+      <ul class="features">
+        <li><i class="fas fa-check"></i> 2 AI room designs per month</li>
+        <li><i class="fas fa-check"></i> Basic furniture suggestions</li>
+        <li><i class="fas fa-check"></i> Standard resolution images</li>
+      </ul>
+      <a href="#" class="plan-button">Get Started</a>
+    </div>
+    
+    <div class="plan popular">
+      <div class="popular-badge">Most Popular</div>
+      <h3>Pro</h3>
+      <div class="price">₹399<span>/month</span></div>
+      <ul class="features">
+        <li><i class="fas fa-check"></i> 14 AI room designs per month</li>
+        <li><i class="fas fa-check"></i> Premium furniture suggestions</li>
+        <li><i class="fas fa-check"></i> High resolution images</li>
+        <li><i class="fas fa-check"></i> Priority support</li>
+        <li><i class="fas fa-check"></i> Save favorite designs</li>
+      </ul>
+      <a href="#" class="plan-button">Get Started</a>
+    </div>
+    
+    <div class="plan">
+      <h3>Unlimited</h3>
+      <div class="price">₹999<span>/month</span></div>
+      <ul class="features">
+        <li><i class="fas fa-check"></i> Unlimited AI room designs</li>
+        <li><i class="fas fa-check"></i> Premium+ furniture suggestions</li>
+        <li><i class="fas fa-check"></i> Ultra HD resolution</li>
+        <li><i class="fas fa-check"></i> Design history</li>
+        <li><i class="fas fa-check"></i> Commercial license</li>
+      </ul>
+      <a href="#" class="plan-button">Get Started</a>
+    </div>
+  </section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed FAQ Section</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+       
+        
+     
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+        }
+        
+        .faq {
+            padding: 30px;
+        }
+        
+        .faq h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .faq h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            border-radius: 2px;
+        }
+        
+        .faq-item {
+            margin-bottom: 15px;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            border-color: #d0d0d0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .faq-question {
+            padding: 20px;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .faq-question:hover {
+            background: #f0f4ff;
+        }
+        
+        .faq-question h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .faq-question i {
+            font-size: 16px;
+            color: #6a11cb;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            background: white;
+        }
+        
+        .faq-answer p {
+            padding: 20px 0;
+            color: #555;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+        }
+        
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border-left: 4px solid #6a11cb;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions p {
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        
+       
+        
+        @media (max-width: 600px) {
+            .faq-question h3 {
+                font-size: 16px;
+                padding-right: 15px;
+            }
+            
+            .faq {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+      
+        
+        <section class="faq">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How does the free trial work?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Our free trial lets you generate 2 basic AI room designs with watermarks. No credit card required. If you love it, you can upgrade to a paid plan for full access.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Can I cancel anytime?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! You can cancel your subscription at any time. You'll continue to have access until the end of your billing period.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Do you offer refunds?</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>We offer a 14-day money-back guarantee on all annual plans. If you're not satisfied, we'll give you a full refund.</p>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> How It Works</h3>
+                <p>Click on any question to reveal the answer. The answer will smoothly expand below the question. Click again or click another question to collapse.</p>
+            </div>
+        </section>
+      
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const faqItems = document.querySelectorAll(".faq-item");
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector(".faq-question");
+                const answer = item.querySelector(".faq-answer");
+                const icon = question.querySelector("i");
+                
+                question.addEventListener("click", () => {
+                    const isActive = item.classList.contains("active");
+                    
+                    // Close all FAQ items
+                    faqItems.forEach(faqItem => {
+                        faqItem.classList.remove("active");
+                    });
+                    
+                    // If the clicked item wasn't active, open it
+                    if (!isActive) {
+                        item.classList.add("active");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+  
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo">ASTHEICKAI</div>
+        <p>Making interior design accessible to everyone.</p>
+      </div>
+      <div class="footer-links">
+        <h3>Links</h3>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <h3>Follow Us</h3>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+ 
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2023 ASTHEICKAI. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
