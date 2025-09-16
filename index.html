@@ -1,0 +1,206 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamRoom AI | Transform Your Room with AI</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">ASTHEICKAI</div>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="#" class="cta-button">Try Free</a></li>
+    </ul>
+    <div class="mobile-menu-icon">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- ✅ Profile section -->
+    <div class="profile-wrapper" id="profileWrapper" style="display: none;">
+      <div class="profile-circle" id="profileCircle">U</div>
+      <div class="profile-dropdown" id="profileDropdown" style="display: none;">
+        <p id="profileEmail">user@email.com</p>
+        <button class="logout-btn" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <ul>
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="#" class="cta-button">Try Free</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Transform your space with <span>AI magic</span> </h1>
+      <p>Upload a photo of your room, describe your dream style, and watch as our AI creates stunning designs just for you.</p>
+
+      <!-- Google Identity Script -->
+      <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+      <!-- Google Sign-In Container -->
+      <div id="g_id_onload"
+          data-client_id="52469152754-uenc2p1hn9cia05dlqjnpqc0374pf8tk.apps.googleusercontent.com"
+          data-context="signin"
+          data-ux_mode="popup"
+          data-callback="handleGoogleSignIn"
+          data-auto_select="true">
+      </div>
+
+      <div class="upload-box">
+        <div class="upload-area" id="uploadArea">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drag & drop your room photo or click to browse</p>
+          <input type="file" id="room-upload" accept="image/*" hidden>
+        </div>
+        <div class="preview-container" id="previewContainer" style="display: none;">
+          <img id="imagePreview" src="#" alt="Preview">
+          <button class="clear-btn" id="clearBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <textarea id="roomPrompt" placeholder="Describe your dream room... (e.g., 'modern minimalist with plants and neutral colors')"></textarea>
+        <button class="ai-button" id="generateBtn">Generate AI Design</button>
+         <div class="result-container" id="resultContainer" style="display: none;">
+          <h3>Your AI Design:</h3>
+          <img id="resultImage" src="" alt="AI Generated Room">
+        </div>
+
+        <!-- Signup Modal -->
+        <div id="signupModal" class="modal" style="display:none;">
+          <div class="modal-card">
+            <span class="close" id="closeSignupModal">&times;</span>
+            <div class="modal-header">
+              <h2>Sign up to continue</h2>
+              <p class="modal-sub">Create your free account to generate AI designs</p>
+            </div>
+            <div class="modal-divider"><span>or</span></div>
+            <div class="g_id_signin" 
+              data-type="standard" 
+              data-shape="rectangular" 
+              data-theme="outline" 
+              data-text="continue_with" 
+              data-size="large" 
+              data-logo_alignment="left"
+              id="googleSignInButton">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+     
+  </section>
+  <div class="headingpic">
+    <h1>SELECT STYLE</h1>
+  </div>
+ <div class="templates">
+  <div class="template" data-style=" ">
+    <img src="pc1.png" alt="">
+    <p class="style-name"></p>
+  </div>
+
+  <div class="template" data-style="">
+    <img src="pc2.jpeg" alt="">
+    <p class="style-name"></p>
+  </div>
+
+  <div class="template" data-style="">
+    <img src="pc3.jpeg" alt="">
+    <p class="style-name"></p>
+  </div>
+
+  <div class="template" data-style=>
+    <img src="pc4.jpg" alt="">
+    <p class="style-name"></p>
+  </div>
+
+  <div class="template" data-style=>
+    <img src="pc5.jpeg" alt="">
+    <p class="style-name"></p>
+  </div>
+</div>
+
+
+
+
+<!-- How It Works -->
+  <section class="how-it-works">
+
+    <h2>How its work</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Upload Your Room</h3>
+        <p>Take or upload a photo of your current space from any angle.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Chose/Describe</h3>
+        <p>Tell us what look you're going for - we'll handle the rest.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Get AI Designs</h3>
+        <p>Receive multiple AI-generated designs in seconds.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Furniture Suggestions -->
+  <section class="furniture">
+    <h2>AI-Powered Furniture Picks</h2>
+    <p class="subtitle">Our AI suggests real furniture to match your new design</p>
+    <div class="furniture-grid" id="furnitureSuggestions">
+      <!-- Filled by JavaScript -->
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <h2>Ready to transform your space?</h2>
+    <p>Join thousands of happy customers who redesigned their rooms with AI.</p>
+    <a href="pricing.html" class="cta-button">See Pricing Plans</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo">ASTHEICKAI</div>
+        <p>Making interior design accessible to everyone.</p>
+      </div>
+      <div class="footer-links">
+        <h3>Links</h3>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <h3>Follow Us</h3>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+         
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2023 ASTHEICKAI. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
