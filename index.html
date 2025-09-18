@@ -199,8 +199,201 @@
     <div class="footer-bottom">
       <p>© 2023 ASTHEICKAI. All rights reserved.</p>
     </div>
+   <!-- Put this near the end of your page -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+  /* Modal styles using your color palette */
+  :root{
+    --primary:#9381ff;
+    --primary-2:#b8b8ff;
+    --bg:#f8f7ff;
+    --accent:#ffd8be;
+    --card:#ffeedd;
+  }
+  .price-modal-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:10000;
+  }
+  .price-modal{
+    width: 420px;
+    max-width:95%;
+    background:var(--bg);
+    border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    padding:18px;
+    font-family:Inter, system-ui, sans-serif;
+  }
+  .price-modal h3{ margin:0 0 8px; color:var(--primary); }
+  .packages{ display:flex; gap:10px; margin:12px 0; }
+  .pkg{
+    flex:1; padding:12px; border-radius:10px; background:linear-gradient(180deg,var(--card),white); cursor:pointer; border:2px solid transparent;
+  }
+  .pkg.selected{ border-color:var(--primary); box-shadow:0 6px 18px rgba(147,129,255,0.1); transform:translateY(-2px); }
+  .pkg .title{ font-weight:700; }
+  .pkg .price{ font-size:20px; margin-top:6px; color:#222;}
+  .modal-actions{ display:flex; gap:10px; margin-top:14px; justify-content:flex-end; }
+  .btn{ padding:8px 14px; border-radius:8px; border:0; cursor:pointer; font-weight:600; }
+  .btn-primary{ background:var(--primary); color:white; }
+  .btn-ghost{ background:transparent; color:var(--primary); border:1px solid var(--primary-2); }
+  .small{ font-size:13px; color:#555; margin-top:6px;}
+  /* show */
+  .price-modal-backdrop.show{ display:flex; }
+</style>
+
+<!-- Modal markup -->
+<div id="priceModalBackdrop" class="price-modal-backdrop" aria-hidden="true">
+  <div class="price-modal" role="dialog" aria-modal="true" aria-labelledby="priceModalTitle">
+    <h3 id="priceModalTitle">Choose a package to continue</h3>
+    <div class="small">Select one of the packages below — payment is done via Razorpay. After successful payment you'll be allowed to generate images.</div>
+
+    <div class="packages" id="packageList">
+      <div class="pkg" data-id="starter" data-amount="500">
+        <div class="title">Starter</div>
+        <div class="price">₹500 — 10 credits</div>
+        <div class="small">For occasional use</div>
+      </div>
+      <div class="pkg" data-id="pro" data-amount="1200">
+        <div class="title">Pro</div>
+        <div class="price">₹1,200 — 30 credits</div>
+        <div class="small">Best value</div>
+      </div>
+      <div class="pkg" data-id="unlimited" data-amount="3500">
+        <div class="title">Unlimited (30 days)</div>
+        <div class="price">₹3,500 — Unlimited</div>
+        <div class="small">Heavy users</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="modalCancel" class="btn btn-ghost">Cancel</button>
+      <button id="modalBuy" class="btn btn-primary">Buy & Pay</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // helper
+  const $ = q => document.querySelector(q);
+  const backdrop = $('#priceModalBackdrop');
+  const packageList = $('#packageList');
+  let selectedPkg = packageList.querySelector('.pkg'); // default first
+
+  // select package UI
+  packageList.addEventListener('click', e=>{
+    const pkg = e.target.closest('.pkg');
+    if(!pkg) return;
+    packageList.querySelectorAll('.pkg').forEach(p=>p.classList.remove('selected'));
+    pkg.classList.add('selected');
+    selectedPkg = pkg;
+  });
+
+  // Button handlers
+  $('#modalCancel').addEventListener('click', ()=>{
+    backdrop.classList.remove('show');
+  });
+
+  $('#modalBuy').addEventListener('click', async ()=>{
+    if(!selectedPkg) return alert('Select a package');
+    const pkgId = selectedPkg.dataset.id;
+    const amount = parseInt(selectedPkg.dataset.amount,10); // INR rupees
+
+    try {
+      // 1) create order on server (server returns order id and key_id)
+      const createResp = await fetch('/api/create-order', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ packageId: pkgId, amount })
+      });
+      const createJson = await createResp.json();
+      if(!createResp.ok) throw new Error(createJson?.message || 'Failed to create order');
+
+      const { orderId, razorpayKey } = createJson;
+
+      // 2) open Razorpay Checkout
+      const options = {
+        "key": razorpayKey, // from server
+        "amount": amount * 100, // paisa
+        "currency": "INR",
+        "name": "Asthetick",
+        "description": selectedPkg.querySelector('.title').innerText,
+        "order_id": orderId,
+        handler: async function (response){
+          // response contains: razorpay_payment_id, razorpay_order_id, razorpay_signature
+          // 3) send to server for verification
+          const verifyResp = await fetch('/api/verify-payment', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ 
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              packageId: pkgId
+            })
+          });
+          const verifyJson = await verifyResp.json();
+          if(verifyResp.ok && verifyJson.verified){
+            // mark purchased on client (you may reload or update UI)
+            backdrop.classList.remove('show');
+            alert('Payment verified — you can now generate!');
+            // Optionally call an endpoint to refresh session/purchase flags
+            await fetch('/api/refresh-session', { method:'POST' });
+            // now call your generate action automatically (optional)
+            // document.querySelector('#generateBtn').click();
+          } else {
+            alert('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: { /* optional prefill */ },
+        theme: { "color": getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#9381ff' }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error(err);
+      alert('Payment initialization failed: ' + (err.message || err));
+    }
+  });
+
+  // Intercept your Generate button:
+  async function onGenerateClicked(e){
+    e.preventDefault();
+    // check server if user has active purchase / credits
+    const resp = await fetch('/api/check-purchase', { method:'GET' });
+    const j = await resp.json();
+    if(resp.ok && j.allowed){
+      // allowed to generate
+      doGenerate(); // your existing generate function
+    } else {
+      // show modal to buy
+      backdrop.classList.add('show');
+    }
+  }
+
+  // attach to your generate button (change selector to match your site)
+  const genBtn = document.querySelector('#generateBtn') || document.querySelector('.generate-btn');
+  if(genBtn) genBtn.addEventListener('click', onGenerateClicked);
+
+  // Placeholder: your generation function
+  function doGenerate(){
+    // call existing generate logic here
+    console.log('Generating... (call existing function)');
+    // e.g., call your /api/generate endpoint
+  }
+
+  // Load Razorpay script dynamically
+  (function loadRazorpay(){
+    if(window.Razorpay) return;
+    const s = document.createElement('script');
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.async = true;
+    document.head.appendChild(s);
+  })();
+</script>
+
   </footer>
 
   <script src="app.js"></script>
 </body>
+
 </html>
