@@ -6,6 +6,9 @@
   box-sizing: border-box;  
  
 }
+.cta-button{
+  background-color: whitesmoke
+}
 
 body {
   font-family: 'Poppins', sans-serif;
@@ -1277,3 +1280,4 @@ background-color:#4285F4;
   cursor: pointer;
   transition: background-color 0.3s ease;
  }
+
