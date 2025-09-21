@@ -1,4 +1,4 @@
- // ===============================
+// ===============================
 // DOM Elements
 // ===============================
 const elements = {
@@ -14,68 +14,17 @@ const elements = {
   roomPrompt: document.getElementById('roomPrompt'),
   furnitureSuggestions: document.getElementById('furnitureSuggestions'),
   contactForm: document.getElementById('contactForm'),
-  // Support either id="googleSignIn" or id="googleSignInButton"
   googleSignInBtn: document.getElementById('googleSignIn') || document.getElementById('googleSignInButton'),
   signupModal: document.getElementById('signupModal'),
   closeModalBtn: document.getElementById('closeSignupModal'),
-  // Profile UI
   profileWrapper: document.getElementById('profileWrapper'),
   profileCircle: document.getElementById('profileCircle'),
   profileDropdown: document.getElementById('profileDropdown'),
   profileEmail: document.getElementById('profileEmail'),
   logoutBtn: document.getElementById('logoutBtn'),
+  resultContainer: document.getElementById('resultContainer'),
+  resultImage: document.getElementById('resultImage')
 };
-// app.js
-
-document.addEventListener("DOMContentLoaded", () => {
-  const generateBtn = document.getElementById("generateBtn");
-  const promptInput = document.getElementById("roomPrompt");
-  const resultContainer = document.getElementById("resultContainer");
-  const resultImage = document.getElementById("resultImage");
-
-  generateBtn.addEventListener("click", async () => {
-    const prompt = promptInput.value.trim();
-
-    if (!prompt) {
-      alert("⚠️ Please enter a description for your dream room!");
-      return;
-    }
-
-    // Show loading state
-    generateBtn.textContent = "Generating...";
-    generateBtn.disabled = true;
-
-    try {
-      const response = await fetch("http://localhost:5000/api/generate-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate image");
-      }
-
-      const data = await response.json();
-
-      if (data.imageUrl) {
-        resultImage.src = data.imageUrl;
-        resultContainer.style.display = "block";
-      } else {
-        alert("❌ No image returned from AI.");
-      }
-    } catch (error) {
-      console.error("Error generating image:", error);
-      alert("❌ Something went wrong. Please try again.");
-    } finally {
-      generateBtn.textContent = "Generate AI Design";
-      generateBtn.disabled = false;
-    }
-  });
-});
-
 
 // ===============================
 // State
@@ -83,6 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
 const state = {
   isLoggedIn: false,
   googleUser: null,
+  selectedStyle: null,
+  API_URL: "http://localhost:5000/api/generate-image" // Define your API endpoint
 };
 
 // ===============================
@@ -91,7 +42,8 @@ const state = {
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   loadGoogleIdentityServices();
-  restoreSession(); // ✅ keep user logged in after refresh
+  restoreSession();
+  setupStyleTemplates();
 });
 
 // ===============================
@@ -117,7 +69,6 @@ function setupEventListeners() {
       closeMobileMenu();
     }
   });
-  
 
   // Upload
   if (elements.uploadArea) {
@@ -252,7 +203,7 @@ function clearUploadedImage(e) {
 // ===============================
 // AI Generate
 // ===============================
-function handleGenerateClick() {
+async function handleGenerateClick() {
   if (!state.isLoggedIn) {
     showSignupModal();
     return;
@@ -261,24 +212,56 @@ function handleGenerateClick() {
   const file = elements.roomUpload.files && elements.roomUpload.files[0];
   const prompt = elements.roomPrompt && elements.roomPrompt.value;
 
-  if (!file) return alert('Please upload a room photo!');
-  if (!prompt || !prompt.trim()) return alert('Please describe your dream room!');
+  if (!file) {
+    alert('Please upload a room photo!');
+    return;
+  }
+  
+  if (!prompt || !prompt.trim()) {
+    alert('Please describe your dream room!');
+    return;
+  }
 
   showLoadingState();
-  generateAIDesign(file, prompt);
+  
+  try {
+    // Create form data for file upload
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('prompt', prompt);
+    
+    if (state.selectedStyle) {
+      formData.append('style', state.selectedStyle);
+    }
+
+    const response = await fetch(state.API_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate image");
+    }
+
+    const data = await response.json();
+
+    if (data.imageUrl) {
+      elements.resultImage.src = data.imageUrl;
+      elements.resultContainer.style.display = "block";
+    } else {
+      alert("❌ No image returned from AI.");
+    }
+  } catch (error) {
+    console.error("Error generating image:", error);
+    alert("❌ Something went wrong. Please try again.");
+  } finally {
+    resetGenerateButton();
+  }
 }
 
 function showLoadingState() {
   elements.generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
   elements.generateBtn.disabled = true;
-}
-
-function generateAIDesign(file, prompt) {
-  // Mock demo
-  setTimeout(() => {
-    resetGenerateButton();
-    alert('🎉 Your AI design is ready!');
-  }, 2000);
 }
 
 function resetGenerateButton() {
@@ -321,25 +304,19 @@ function loadGoogleIdentityServices() {
   script.defer = true;
   document.head.appendChild(script);
 
-  // Optional: render button if you want to programmatically create it
   script.onload = () => {
     if (window.google && elements.googleSignInBtn) {
-      // If you are NOT using <div id="g_id_onload" data-callback="handleGoogleSignIn">,
-      // you can uncomment the two lines below and set your CLIENT_ID
-      // google.accounts.id.initialize({ client_id: "YOUR_CLIENT_ID", callback: handleGoogleSignIn });
-      // google.accounts.id.renderButton(elements.googleSignInBtn, { theme: "outline", size: "large" });
+      // Google sign-in initialization if needed
     }
   };
 }
 
 // ===============================
-// Google callback (MUST be global)
-// Hooked via: data-callback="handleGoogleSignIn" on #g_id_onload
+// Google callback
 // ===============================
 window.handleGoogleSignIn = function (response) {
   const payload = parseJwt(response.credential);
 
-  // Save locally
   const user = {
     id: payload.sub,
     name: payload.name || '',
@@ -347,7 +324,6 @@ window.handleGoogleSignIn = function (response) {
     picture: payload.picture || '',
   };
 
-  // Persist + update UI
   localStorage.setItem('user', JSON.stringify(user));
   state.googleUser = user;
   state.isLoggedIn = true;
@@ -369,7 +345,6 @@ function restoreSession() {
       applyLoggedInUI(user);
     }
   } catch (e) {
-    // bad JSON, clear it
     localStorage.removeItem('user');
   }
 }
@@ -378,13 +353,11 @@ function restoreSession() {
 // Apply logged-in UI
 // ===============================
 function applyLoggedInUI(user) {
-  // Hide signup modal & Google button
   closeSignupModal();
   if (elements.googleSignInBtn) {
     elements.googleSignInBtn.style.display = 'none';
   }
 
-  // Show profile in navbar
   if (elements.profileWrapper) {
     elements.profileWrapper.style.display = 'flex';
   }
@@ -401,21 +374,17 @@ function applyLoggedInUI(user) {
 // Logout
 // ===============================
 function handleLogout() {
-  // Clear storage & state
   localStorage.removeItem('user');
   state.googleUser = null;
   state.isLoggedIn = false;
 
-  // Hide profile + dropdown
   if (elements.profileDropdown) elements.profileDropdown.style.display = 'none';
   if (elements.profileWrapper) elements.profileWrapper.style.display = 'none';
 
-  // Show Google sign-in button again (inside modal or page)
   if (elements.googleSignInBtn) {
     elements.googleSignInBtn.style.display = 'block';
   }
 
-  // Optionally show modal to prompt sign-in again
   showSignupModal();
 }
 
@@ -443,126 +412,92 @@ function parseJwt(token) {
     return {};
   }
 }
-document.getElementById("generateBtn").addEventListener("click", async () => {
-  const prompt = document.getElementById("roomPrompt").value.trim();
-  if (!prompt) {
-    alert("Please describe your dream room first!");
-    return;
-  }
 
-  const resultContainer = document.getElementById("resultContainer");
-  const resultImage = document.getElementById("resultImage");
-  resultContainer.style.display = "block";
-  resultImage.src = "";
-  resultContainer.querySelector("h3").innerText = "Generating...";
+// ===============================
+// Style Selection
+// ===============================
+function setupStyleTemplates() {
+  const styleNames = [
+    "Modern Minimalist",
+    "Cozy Bohemian", 
+    "Industrial Chic",
+    "Scandinavian",
+    "Coastal Retreat"
+  ];
 
-  try {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-
-    const data = await res.json();
-
-    // Show generated image
-    resultImage.src = data.imageUrl;
-    resultContainer.querySelector("h3").innerText = "Your AI Design:";
-  } catch (err) {
-    console.error(err);
-    resultContainer.querySelector("h3").innerText = "Error generating image.";
-  }
-});
-async function generateImage() {
-  const prompt = document.getElementById("prompt").value;
-
-  const response = await fetch("http://localhost:5000/api/generate-image", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt }),
+  // Apply style names to template elements
+  document.querySelectorAll('.template').forEach((template, index) => {
+    if (index < styleNames.length) {
+      template.setAttribute('data-style', styleNames[index]);
+      const nameElement = template.querySelector('.style-name');
+      if (nameElement) {
+        nameElement.textContent = styleNames[index];
+      }
+    }
   });
 
-  const data = await response.json();
-  document.getElementById("result").src = data.imageUrl;
-}
-document.addEventListener("DOMContentLoaded", () => {
-  const generateBtn = document.getElementById("generateBtn");
-  const promptInput = document.getElementById("roomPrompt");
-  const resultImage = document.getElementById("resultImage");
-  const resultContainer = document.getElementById("resultContainer");
-
-  
-
-  generateBtn.addEventListener("click", async () => {
-    const prompt = promptInput.value.trim();
-
-    if (!prompt) {
-      alert("⚠️ Please enter a description for your dream room!");
-      return;
-    }
-
-    generateBtn.textContent = "Generating...";
-    generateBtn.disabled = true;
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+  // Add click event listeners to templates
+  document.querySelectorAll('.template').forEach(template => {
+    template.addEventListener('click', () => {
+      const styleName = template.getAttribute('data-style');
+      
+      // Remove selection from all templates
+      document.querySelectorAll('.template').forEach(t => {
+        t.style.border = '2px solid transparent';
+        t.style.transform = 'scale(1)';
+        const nameEl = t.querySelector('.style-name');
+        if (nameEl) nameEl.style.display = 'none';
       });
 
-      const data = await response.json();
-      if (data.imageUrl) {
-        resultImage.src = data.imageUrl;
-        resultContainer.style.display = "block";
-      } else {
-        alert("❌ No image returned from AI.");
+      // Apply selection to clicked template
+      template.style.border = '2px solid #4e54c8';
+      template.style.transform = 'scale(1.03)';
+      const nameEl = template.querySelector('.style-name');
+      if (nameEl) nameEl.style.display = 'block';
+
+      // Store the selected style
+      state.selectedStyle = styleName;
+
+      // Update the prompt with the selected style
+      if (elements.roomPrompt) {
+        elements.roomPrompt.value = `Design my room in ${styleName} style`;
+        elements.roomPrompt.focus();
       }
-    } catch (error) {
-      console.error("Error generating image:", error);
-      alert("❌ Something went wrong. Please try again.");
-    } finally {
-      generateBtn.textContent = "Generate AI Design";
-      generateBtn.disabled = false;
-    }
-  });
-});
-// =========================
-// STYLE SELECTION LOGIC
-// =========================
-const templates = document.querySelectorAll(".template");
-let selectedStyle = null;
 
-templates.forEach(template => {
-  template.addEventListener("click", () => {
-    const style = template.getAttribute("data-style");
-
-    // Remove selection from all
-    templates.forEach(t => {
-      t.classList.remove("selected");
-      const nameEl = t.querySelector(".style-name");
-      if (nameEl) nameEl.textContent = "";
+      // Show confirmation message
+      showStyleConfirmation(styleName);
     });
-
-    // Apply selection to clicked one
-    template.classList.add("selected");
-    const nameEl = template.querySelector(".style-name");
-    if (nameEl) nameEl.textContent = style;
-
-    selectedStyle = style;
-
-    console.log("Selected style:", selectedStyle);
   });
-});
+}
 
-// =========================
-// CONTACT FORM + EMAILJS
-// =========================
- function sendMail(event) {
-  // stop form from refreshing page
+function showStyleConfirmation(styleName) {
+  const confirmation = document.createElement('div');
+  confirmation.textContent = `✓ ${styleName} style selected`;
+  confirmation.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4e54c8;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    font-size: 14px;
+  `;
+  document.body.appendChild(confirmation);
+
+  setTimeout(() => {
+    document.body.removeChild(confirmation);
+  }, 2000);
+}
+
+// ===============================
+// EmailJS Contact Form
+// ===============================
+function sendMail(event) {
   event.preventDefault();
 
-  // collect values from form
   const params = {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
@@ -570,11 +505,9 @@ templates.forEach(template => {
     message: document.getElementById("message").value,
   };
 
-  // ✅ replace with your actual EmailJS values
-  const serviceID = "service_16vdc3s";     // e.g. service_ab12cde
-  const templateID = "template_pajzlda";   // e.g. template_xy34z
+  const serviceID = "service_16vdc3s";
+  const templateID = "template_pajzlda";
 
-  // send email
   emailjs.send(serviceID, templateID, params)
     .then(res => {
       console.log("✅ Email sent:", res);
@@ -586,74 +519,3 @@ templates.forEach(template => {
       alert("Message failed to send. Try again later.");
     });
 }
-// Add this to your existing JavaScript code
-
-// Add style names to your templates (update with your actual style names)
-const styleNames = [
-    "Modern Minimalist",
-    "Cozy Bohemian", 
-    "Industrial Chic",
-    "Scandinavian",
-    "Coastal Retreat"
-];
-
-// Apply style names to your template elements
-document.querySelectorAll('.template').forEach((template, index) => {
-    if (index < styleNames.length) {
-        template.setAttribute('data-style', styleNames[index]);
-        template.querySelector('.style-name').textContent = styleNames[index];
-    }
-});
-
-// Add click event listeners to templates
-document.querySelectorAll('.template').forEach(template => {
-    template.addEventListener('click', () => {
-        const styleName = template.getAttribute('data-style');
-        const roomPrompt = document.getElementById('roomPrompt');
-        
-        // Set the message about the selected style
-        roomPrompt.value = `You selected the ${styleName} style for your room`;
-        
-        // Move focus to the prompt textarea and place cursor at the end
-        roomPrompt.focus();
-        roomPrompt.setSelectionRange(roomPrompt.value.length, roomPrompt.value.length);
-        
-        // Optional: Add visual feedback for selected template
-        document.querySelectorAll('.template').forEach(t => {
-            t.style.border = '2px solid transparent';
-            t.style.transform = 'scale(1)';
-            t.style.transition = 'all 0.3s ease';
-        });
-        
-        template.style.border = '2px solid #4e54c8';
-        template.style.transform = 'scale(1.03)';
-        
-        // You can also store the selected style for later use
-        localStorage.setItem('selectedStyle', styleName);
-        
-        // Optional: Show a brief confirmation message
-        const confirmation = document.createElement('div');
-        confirmation.textContent = `✓ ${styleName} style selected`;
-        confirmation.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #4e54c8;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            font-size: 14px;
-        `;
-        document.body.appendChild(confirmation);
-        
-        // Remove confirmation after 2 seconds
-        setTimeout(() => {
-            document.body.removeChild(confirmation);
-        }, 2000);
-        
-        // Optional: Scroll to the prompt area if it's not visible
-        roomPrompt.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-});
