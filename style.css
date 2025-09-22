@@ -1281,3 +1281,6 @@ background-color:#4285F4;
   transition: background-color 0.3s ease;
  }
 
+.modal-sub {
+color: white;
+}
