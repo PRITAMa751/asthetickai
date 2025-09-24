@@ -39,7 +39,7 @@ img {
 }
 
 
-
+ 
  
 /* Buttons */
 .button, .cta-button, .plan-button, .submit-button, .ai-button {
@@ -189,7 +189,7 @@ img {
 
 .hero p {
   font-size: 1.2rem;
-  color: var(--gray);
+  color: white;
   margin-bottom: 2.5rem;
   max-width: 600px;
 }
@@ -1284,3 +1284,4 @@ background-color:#4285F4;
 .modal-sub {
 color: white;
 }
+
